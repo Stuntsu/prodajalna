@@ -212,11 +212,40 @@ streznik.post('/prijava', function(zahteva, odgovor) {
       //stmt.run("", "", "", "", "", "", "", "", "", "", "", 3); 
       //stmt.finalize();
       
+      stmt.run(polja.FirstName, polja.LastName, polja.Company, polja.Adress, polja.City, polja.State, polja.Country, polja.PostalCode, polja.Phone, polja.Fax, polja.Email, 3);
+      stmt.finalize();
+      
+      //stmt.run() tega ne rabim
+      
     } catch (err) {
       napaka2 = true;
     }
-  
-    odgovor.end();
+    
+    
+    if(napaka1 || napaka2){
+      
+      vrniRacune(function(napaka2, racuni) {
+        vrniStranke(function(napaka1, stranke) {
+          
+          odgovor.render('prijava', {sporocilo: "Prišlo je do napake pri registraciji nove stranke. Prosim preverite vnešene podatke in poskusite znova.", 
+          seznamStrank: stranke, seznamRacunov: racuni});
+          
+        })
+      });
+      
+      
+    }else{
+      
+      vrniRacune(function(napaka2, racuni) {
+        vrniStranke(function(napaka1, stranke) {
+          odgovor.render('prijava', {sporocilo: "Stranka je bila uspešno registrirana.", seznamStrank: stranke, seznamRacunov: racuni});
+          
+        })
+      });
+      
+    }
+    // ta odgovo.end() mora biti zakomentiran.
+    // odgovor.end();
   });
 })
 
