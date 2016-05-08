@@ -204,7 +204,6 @@ streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
     trenutnaStranka(zahteva.session.idIzbraneStranke, function(odgovor, stranka) {
         
         odgovor.setHeader('content-type', 'text/xml');
-        
         odgovor.render('eslog', {
           vizualiziraj: zahteva.params.oblika == 'html' ? true : false,
           postavkeRacuna: pesmi,
