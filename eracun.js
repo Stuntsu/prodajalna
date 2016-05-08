@@ -163,6 +163,17 @@ var strankaIzRacuna = function(racunId, callback) {
       callback(napaka, vrstice);
     })
 }
+//za iskanje trenutne stranke ( ne stranke iz racuna )
+//podobno kot racunId pri "vrni podrobonosti o stranki iz računa"
+
+var trenutnaStranka = function(idStranke, callback){
+        
+    pb.all("SELECT Customer.* FROM Customer, Invoice \
+            WHERE Customer.CustomerId=" + idStranke, function(napaka, vrstice) 
+            {
+              callback(napaka, vrstice);
+            })
+}
 
 // Izpis računa v HTML predstavitvi na podlagi podatkov iz baze
 streznik.post('/izpisiRacunBaza', function(zahteva, odgovor) {
@@ -183,19 +194,6 @@ streznik.post('/izpisiRacunBaza', function(zahteva, odgovor) {
     })
    })
   })
-  
-//za iskanje trenutne stranke ( ne stranke iz racuna )
-//podobno kot racunId pri "vrni podrobonosti o stranki iz računa"
-
-var trenutnaStranka = function(idStranke, callback){
-        
-    pb.all("SELECT Customer.* FROM Customer, Invoice \
-            WHERE Customer.CustomerId=" + idStranke,
-    
-    function(napaka, vrstice) {
-       callback(napaka, vrstice);
-    })
-}
 
 // Izpis računa v HTML predstavitvi ali izvorni XML obliki
 streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
