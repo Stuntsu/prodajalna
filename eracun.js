@@ -208,7 +208,7 @@ streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
     } 
     else {
     
-    trenutnaStranka(zahteva.session.idIzbraneStranke, function(odgovor, stranka) {
+    trenutnaStranka(zahteva.session.idIzbraneStranke, function(napaka, stranka) {
         
         odgovor.setHeader('content-type', 'text/xml');
         odgovor.render('eslog', {
@@ -298,6 +298,7 @@ streznik.post('/stranka', function(zahteva, odgovor) {
 
 // Odjava stranke
 streznik.post('/odjava', function(zahteva, odgovor) {
+    zahteva.session.idIzbraneStranke = null;
     sejnaSpremenljivka = false;
     odgovor.redirect('/prijava') 
 })
