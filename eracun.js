@@ -132,6 +132,9 @@ var pesmiIzRacuna = function(racunId, callback) {
     Track.GenreId = Genre.GenreId AND \
     Track.TrackId IN (SELECT InvoiceLine.TrackId FROM InvoiceLine, Invoice \
     WHERE InvoiceLine.InvoiceId = Invoice.InvoiceId AND Invoice.InvoiceId = " + racunId + ")",
+    //function(napaka, vrstice) {
+      //console.log(vrstice);
+      //CALLBACK namest CONSOLE.log, isto kot pesmiIzKosarice
     function(napaka, vrstice) {
      
       if (napaka) {
@@ -143,7 +146,8 @@ var pesmiIzRacuna = function(racunId, callback) {
         }
         callback(napaka, vrstice);
       }
-    })
+  
+  })
 }
 
 // Vrni podrobnosti o stranki iz računa
