@@ -141,17 +141,18 @@ var pesmiIzRacuna = function(racunId, callback) {
       //console.log(vrstice);
       //CALLBACK namest CONSOLE.log, isto kot pesmiIzKosarice
     function(napaka, vrstice) {
-      if(napaka){
+     
+      if (napaka) {
         callback(false);
-      }
-      else{
-        for(var i=0; i < vrstice.length; i++){
+      } 
+      else {
+        for (var i=0; i<vrstice.length; i++) {
           vrstice[i].stopnja = davcnaStopnja((vrstice[i].opisArtikla.split(' (')[1]).split(')')[0], vrstice[i].zanr);
         }
         callback(napaka, vrstice);
       }
   
-})
+  })
 }
 
 // Vrni podrobnosti o stranki iz računa
@@ -162,44 +163,63 @@ var strankaIzRacuna = function(racunId, callback) {
       callback(napaka, vrstice);
     })
 }
+//za iskanje trenutne stranke ( ne stranke iz racuna )
+//podobno kot racunId pri "vrni podrobonosti o stranki iz računa"
+
+var trenutnaStranka = function(idStranke, callback){
+        
+    pb.all("SELECT Customer.* FROM Customer, Invoice \
+            WHERE Customer.CustomerId=" + idStranke, function(napaka, vrstice) 
+            {
+              callback(napaka, vrstice);
+            })
+}
 
 // Izpis računa v HTML predstavitvi na podlagi podatkov iz baze
 streznik.post('/izpisiRacunBaza', function(zahteva, odgovor) {
   
   var form = new formidable.IncomingForm();
-  form.parse(zahteva, function (napaka, polja, datoteke) {
-
-      var trenutnaStranka = polja.seznamRacunov;
-      
-      strankaIzRacuna(trenutnaStranka, function(napaka1, stranka){
-          pesmiIzRacuna(trenutnaStranka, function(napaka2, pesmi){
-              // podobno kot izpis racuna v HTML ali XML, pod "else"
-              odgovor.setHeader('content-type', 'text/xml');
-              odgovor.render('eslog', {
-                vizualiziraj: true,
-                postavkeRacuna:pesmi,
-                stranke: stranka
-              })
-          })
+  form.parse(zahteva, function(napaka, polja, datoteke){
+    var trenutnaStranka = polja.seznamRacunov;
+    
+    strankaIzRacuna(trenutnaStranka, function(napaka1, stranka) {
+      pesmiIzRacuna(trenutnaStranka, function(napaka2, pesmi) {
+        odgovor.setHeader('content-type', 'text/xml');
+        odgovor.render('eslog', {
+        vizualiziraj: true,
+        postavkeRacuna: pesmi,
+        stranke: stranka
+        })
       })
+    })
+   })
   })
-})
 
 // Izpis računa v HTML predstavitvi ali izvorni XML obliki
 streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
   pesmiIzKosarice(zahteva, function(pesmi) {
+    
     if (!pesmi) {
       odgovor.sendStatus(500);
-    } else if (pesmi.length == 0) {
+    } 
+    else if (pesmi.length == 0) {
       odgovor.send("<p>V košarici nimate nobene pesmi, \
         zato računa ni mogoče pripraviti!</p>");
-    } else {
-      odgovor.setHeader('content-type', 'text/xml');
-      odgovor.render('eslog', {
-        vizualiziraj: zahteva.params.oblika == 'html' ? true : false,
-        postavkeRacuna: pesmi
-      })  
-    }
+    } 
+    else {
+    
+    trenutnaStranka(zahteva.session.idIzbraneStranke, function(napaka, stranka) {
+        
+        odgovor.setHeader('content-type', 'text/xml');
+        odgovor.render('eslog', {
+          vizualiziraj: zahteva.params.oblika == 'html' ? true : false,
+          postavkeRacuna: pesmi,
+          stranke: stranka
+        })
+    })
+    
+    
+ }
   })
 })
 
@@ -297,13 +317,18 @@ streznik.post('/stranka', function(zahteva, odgovor) {
   var form = new formidable.IncomingForm();
   sejnaSpremenljivka = true;
   
-  form.parse(zahteva, function (napaka1, polja, datoteke) {
-    odgovor.redirect('/')
-  });
+  form.parse(zahteva, function (napaka, polja, datoteke) {
+      zahteva.session.idIzbraneStranke = polja.seznamStrank; //izbrana stranka ID
+  })
+  
+  form.parse(zahteva, function(napaka1, polja, datoteke) {
+      odgovor.redirect('/')
+  })
 })
 
 // Odjava stranke
 streznik.post('/odjava', function(zahteva, odgovor) {
+    zahteva.session.idIzbraneStranke = null;
     sejnaSpremenljivka = false;
     odgovor.redirect('/prijava') 
 })
