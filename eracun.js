@@ -134,6 +134,7 @@ var pesmiIzRacuna = function(racunId, callback) {
     WHERE InvoiceLine.InvoiceId = Invoice.InvoiceId AND Invoice.InvoiceId = " + racunId + ")",
     //function(napaka, vrstice) {
       //console.log(vrstice);
+      //CALLBACK namest CONSOLE.log, isto kot pesmiIzKosarice
     function(napaka, vrstice) {
       if(napaka){
         callback(false);
@@ -141,7 +142,6 @@ var pesmiIzRacuna = function(racunId, callback) {
       else{
         for(var i=0; i < vrstice.length; i++){
           vrstice[i].stopnja = davcnaStopnja((vrstice[i].opisArtikla.split(' (')[1]).split(')')[0], vrstice[i].zanr);
-          
         }
         callback(napaka, vrstice);
       }
@@ -173,7 +173,7 @@ streznik.post('/izpisiRacunBaza', function(zahteva, odgovor) {
               odgovor.render('eslog', {
                 vizualiziraj: true,
                 postavkeRacuna:pesmi,
-                stranke:stranka
+                stranke: stranka
               })
           })
       })
